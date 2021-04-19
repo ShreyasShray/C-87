@@ -49,7 +49,7 @@ export default class BookRequestScreen extends Component{
   render(){
     return(
         <View style={{flex:1}}>
-          <MyHeader title="Request Book"/>
+          <MyHeader title="Request Book" navigation={this.props.navigation} />
             <KeyboardAvoidingView style={styles.keyBoardStyle}>
               <TextInput
                 style ={styles.formTextInput}

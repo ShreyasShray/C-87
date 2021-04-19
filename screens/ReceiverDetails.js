@@ -15,6 +15,7 @@ export default class ReceiverDetails extends React.Component{
         super(props);
         this.state={
         user_id:firebase.auth().currentUser.email,
+        user_name:'',
         receiver_id:this.props.navigation.getParam("details")["user_id"],
         request_id:this.props.navigation.getParam("details")["request_id"],
         book_name:this.props.navigation.getParam("details")["book_name"],
@@ -25,6 +26,7 @@ export default class ReceiverDetails extends React.Component{
         receiver_request_docid:''
         }
     }
+
     getReceiverDetails=async()=>{
         db.collection("users").where("email_id", "==", this.state.receiver_id)
         .get()
@@ -46,7 +48,17 @@ export default class ReceiverDetails extends React.Component{
                 })
             })
         })
+        db.collection("users").where("email_id", "==", this.state.user_id)
+        .get()
+        .then(snapshot=>{
+            snapshot.forEach((doc)=>{
+                this.setState({
+                    user_name : doc.data().first_name + " " + doc.data().last_name
+                })
+            })
+        })
     }
+
     updateBookStatus=async()=>{
         db.collection("all_donations").add({
             book_name:this.state.book_name,
@@ -56,9 +68,24 @@ export default class ReceiverDetails extends React.Component{
             request_status:"Donar Intrested"
         })
     }
+
+    addNotification=async()=>{
+        var message = this.state.user_name + " has shown interest in donating the book";
+        db.collection("notifications").add({
+            targeted_user_id:this.state.receiver_id,
+            donor_id:this.state.user_id,
+            request_id:this.state.request_id,
+            book_name:this.state.book_name,
+            date:firebase.firestore.FieldValue.serverTimestamp(),
+            notification_status:"unread",
+            message:message
+        })
+    }
+
     componentDidMount=()=>{
         this.getReceiverDetails();
     }
+
     render(){
         return(
                 <ScrollView>
@@ -88,7 +115,8 @@ export default class ReceiverDetails extends React.Component{
                         {
                             this.state.receiver_id!==this.state.user_id?(
                                 <TouchableOpacity style={styles.buttonStyle} onPress={()=>{
-                                    this.updateBookStatus
+                                    this.updateBookStatus()
+                                    this.addNotification()
                                     this.props.navigation.navigate("MyDonations")
                                 }}>
                                     <Text style={{fontSize:18, color:'white', textAlign:'center'}}>Donate</Text>
