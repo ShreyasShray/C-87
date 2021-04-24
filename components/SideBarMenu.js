@@ -7,11 +7,86 @@ import {
 } from 'react-native';
 import firebase from 'firebase';
 import {DrawerItems} from 'react-navigation-drawer';
+import {Avatar} from 'react-native-elements';
+import * as ImagePicker from 'expo-image-picker';
+import db from '../config';
 
 export default class SideBarMenu extends React.Component{
+    constructor(){
+        super()
+        this.state={
+            image:"#",
+            userId:firebase.auth().currentUser.email,
+            name:'',
+            doc_id:''
+        }
+    }
+
+    getUserProfile=async()=>{
+        db.collection("users").where("email_id", "==", this.state.userId)
+        .onSnapshot((querySnapshot)=>{
+            querySnapshot.forEach((doc)=>{
+                this.setState({
+                    name : doc.data().first_name + " " + doc.data().last_name
+                })
+            })
+        })
+    }
+
+    selectPicture=async()=>{
+        const {canceled, uri} = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes:ImagePicker.MediaTypeOptions.All,
+            allowsEditing:true,
+            aspect:[4, 3],
+            quality:1
+        })
+        if(!canceled){
+            this.uploadImage(uri, this.state.userId)
+            this.setState({
+                image:uri
+            })
+        }
+    }
+
+    uploadImage=async(uri, imageName)=>{
+        var response = await fetch(uri);
+        var blob = await response.blob();
+        var ref = firebase.storage().ref().child("user_profiles/" + imageName)
+        return ref.put(blob).then((response)=>{
+            this.fetchImage(imageName)
+        })
+    }
+
+    fetchImage=async(imageName)=>{
+        var storageRef = firebase.storage().ref().child("user_profiles/" + imageName);
+        storageRef.getDownloadURL().then((url)=>{
+            this.setState({
+                image:url
+            })
+        }).catch((error)=>{
+            this.setState({
+                image:"#"
+            })
+        })
+    }
+
+    componentDidMount=()=>{
+        this.getUserProfile();
+        this.fetchImage(this.state.userId)
+    }
+
     render(){
         return(
             <View>
+                <Avatar
+                    rounded
+                    source={{uri:this.state.image}}
+                    size="medium"
+                    onPress={()=>{this.selectPicture()}}
+                    containerStyle={styles.imageContainer}
+                    showEditButton
+                />
+                <Text style={{ textAlign:'center', fontSize:18, fontWeight:'bold', marginTop:2, marginBottom:20}}>{this.state.name}</Text>
                 <DrawerItems
                     {...this.props}
                 />
@@ -38,5 +113,14 @@ const styles = StyleSheet.create({
         fontSize:20,
         textAlign:'center',
         fontWeight:'bold',
+    },
+    imageContainer:{
+        flex:1,
+        width:60,
+        height:60,
+        marginLeft:20,
+        marginTop:20,
+        marginBottom:20,
+        borderRadius:10
     }
 })

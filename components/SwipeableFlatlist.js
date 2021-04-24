@@ -7,7 +7,6 @@ import {
     Dimensions,
     StyleSheet
 } from 'react-native';
-import { NativeViewGestureHandler } from 'react-native-gesture-handler';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import db from '../config';;
 import {ListItem, Icon} from 'react-native-elements';
@@ -107,6 +106,7 @@ const styles = StyleSheet.create({
         fontSize:14,
         fontWeight:"bold",
         textAlign:'center',
-        color:"#000"
+        color:"#000",
+        textAlign:'center'
     }
 })

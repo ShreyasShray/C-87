@@ -71,7 +71,7 @@ export default class NotificationScreen extends React.Component{
                                 <Text>You have no Notifications</Text>
                             </View>
                         ):(
-                            <SwipeableFlatlist allNotification={this.state.all_notifications} />
+                            <SwipeableFlatlist all_notifications={this.state.all_notifications} />
                         )
                     }
                 </View>

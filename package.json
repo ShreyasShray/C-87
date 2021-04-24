@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "expo": "^38.0.0",
+    "expo-image-picker": "^10.1.4",
     "firebase": "7.9.0",
     "lottie-react-native": "~2.6.1",
     "react": "16.11.0",

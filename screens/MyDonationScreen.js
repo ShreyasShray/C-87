@@ -47,20 +47,28 @@ export default class MyDonationScreen extends React.Component{
     }
     
     sendBook=async(bookDetails)=>{
-        if(bookDetails.request_status === "Book Sent"){
-          var requestStatus = "Donor Interested"
-          db.collection("all_donations").doc(this.state.doc_id).update({
-            "request_status" : "Donor Interested"
-          })
-          this.sendNotification(bookDetails,requestStatus)
-        }
-        else{
-          var requestStatus = "Book Sent"
-          db.collection("all_donations").doc(this.state.doc_id).update({
-            "request_status" : "Book Sent"
-          })
-          this.sendNotification(bookDetails,requestStatus)
-        }
+        db.collection("all_donations").where("donar_id", "==", this.state.donor_id)
+        .where("request_id", "==", bookDetails.request_id)
+        .get()
+        .then((snapshot)=>{
+            snapshot.forEach((doc)=>{
+                if(bookDetails.request_status === "Book Sent"){
+                  var requestStatus = "Donor Interested"
+                  db.collection("all_donations").doc(doc.id).update({
+                    "request_status" : "Donor Interested"
+                  })
+                  this.sendNotification(bookDetails,requestStatus)
+                }
+                else{
+                  var requestStatus = "Book Sent"
+                  db.collection("all_donations").doc(doc.id).update({
+                    "request_status" : "Book Sent"
+                  })
+                  this.sendNotification(bookDetails,requestStatus)
+                }
+                
+            })
+        })
       }
 
     sendNotification=(bookDetails,requestStatus)=>{
